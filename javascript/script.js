@@ -3,21 +3,28 @@ const app = new Vue({
   data: {
     emails: [],
   },
-  mounted() {
-    const promise = new Promise(async (resolve) => {
-      const tempEmails = [];
-
-      for (let index = 0; index < 10; index++) {
-        await axios
-          .get("https://flynn.boolean.careers/exercises/api/random/mail")
-          .then((response) => {
-            tempEmails.push(response.data.response);
-          });
+    mounted() {
+        let promises = [];
+      const mailer = ()=> new Promise((resolve, reject) => {
+        axios.get("https://flynn.boolean.careers/exercises/api/random/mail").then((response) => {
+         resolve(response.data.response) 
+        }) 
+      }) 
+        
+      for (let i = 0; i < 10; i++) {
+              promises.push(mailer())
       }
 
-      resolve(tempEmails);
-    }).then((emails) => {
-      this.emails = emails;
-    });
-  },
+        
+        
+        
+      console.log(promises)
+
+      Promise.all(promises)
+          .then((value) => {
+              for (let mail of value) {
+              this.emails.push(mail)
+          }
+      })
+    },
 });
